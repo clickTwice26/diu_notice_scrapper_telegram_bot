@@ -25,7 +25,12 @@ def ctime(wdm="both"): #current datetime
     else:
         return dts
 def clog(comment: str, error: str = None):
-    configclog = cload(config_name="logs/clog")
+    configclog = {
+        "log_printout" : "True",
+        "errorlog_dir": "test.txt",
+        "log_dir": "log.txt"
+
+    }
     # print(clogconfig)
     logStr = f"[+][{ctime()}][{comment}] {('Error: '+error) if error else ''}"
     if configclog["log_printout"] == "True":
@@ -58,20 +63,39 @@ def notice_scrapper():
 # print(soup.prettify())
 # print(soup.find_all('a'))
     mydivs = soup.find_all("div", {"class": "row full-notice mb-2"})
+    departmental_notices = {}
     # print(mydivs)
+    counter = 1
     for i in mydivs:
         # print(i)
         # print("\n")
-        department_name = i.find("div", {"class": "col-md-5"}).get_text().strip()
-        if department_name == "Computer Science and Engineering":
-            print(department_name)
+        department_name = i.find("div", {"class": "depart-short"}).get_text().strip()
+        if department_name == "cse":
+            # print(department_name)
             # print(i)
             notice_link = i.find("div", {"class": "notice-btn"}).a.get("href")
+            notice_date = i.find("div", {"class": "col-md-3"}).get_text()
             notice_title = i.find("div", {"class": "notice-btn"}).strong.get_text()
-            print(notice_link)
-            print(notice_title)
-            # break
-        # break
+
+            departmental_notices[f'notices_{counter}'] = {
+                "dept_name": department_name,
+                "notice_link": notice_link,
+                "notice_title": notice_title,
+                "notice_date": notice_date
+            }
+            counter+=1
+            break
+    #print(departmental_notices)
+    departmental_notices = departmental_notices.get("notices_1")
+
+    response = f"""
+    <b>Departmental Notices: {departmental_notices.get("dept_name")}</b>\n
+    <b>Title</b>: {departmental_notices.get("notice_title")}\n
+    <b>Date</b>: {departmental_notices.get("notice_date")}\n
+    <b>Link</b>: {departmental_notices.get("notice_link")}\n
+    
+    """
+    return response
 
 if __name__ == "__main__":
 
